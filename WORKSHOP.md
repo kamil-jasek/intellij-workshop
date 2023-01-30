@@ -160,7 +160,7 @@ It can be used for:
 #### Try it!
 
 ```
-1. Use `ALT+UP (CMD+DOWN)` to open navigation bar.
+1. Use `ALT+HOME (CMD+UP)` to open navigation bar.
 2. Navigate to `IntellijApplication` class, open it with `ENTER`, then try again and open it
    with `SHIFT+ENTER`.
 3. Navigate to `src/main/resources` and create here any new text file. 
