@@ -377,7 +377,7 @@ Intellij that can help you:
 #### 3.3. Code generation
 
 Instead of typing usual methods like equals, hashcode and toString you can generate them. For that
-you can use shortcut: `ALT(CMD)+N`. Another way is to generate simple methods like getters/setters
+you can use shortcut: `ALT+INSERT (CMD+N)`. Another way is to generate simple methods like getters/setters
 by typing field name in the class and using suggestions provided by Intellij.
 
 There are some plugins that are able to extend Generate popup, for example if you are using UUID as
