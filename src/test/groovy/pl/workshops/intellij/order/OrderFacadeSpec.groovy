@@ -31,7 +31,7 @@ class OrderFacadeSpec extends Specification {
         )
 
         when:
-        def created = facade.createOrder(customer.id, products, "XYZ")
+        def created = facade.createOrder(new pl.workshops.intellij.order.CreateOrderCmd(customer.id, products, "XYZ"))
 
         then:
         created
@@ -48,7 +48,7 @@ class OrderFacadeSpec extends Specification {
         )
 
         when:
-        def created = facade.createOrder(customer.id, products, "XYZ")
+        def created = facade.createOrder(new pl.workshops.intellij.order.CreateOrderCmd(customer.id, products, "XYZ"))
 
         then:
         created

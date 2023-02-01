@@ -1,9 +1,11 @@
 package pl.workshops.intellij.order;
 
 import jakarta.persistence.*;
+import pl.workshops.intellij.order.infra.dto.ProductDto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -16,6 +18,7 @@ class Order {
     public static final int ORDER_STATUS_WAITING = 1;
     public static final int ORDER_STATUS_SENT = 2;
     public static final int ORDER_STATUS_DELIVERED = 3;
+    public static final BigDecimal FREE_DELIVERY = new BigDecimal(250);
 
     @Id
     private UUID id;
@@ -35,35 +38,47 @@ class Order {
 
     public BigDecimal deliveryCost;
 
-    public UUID getId() {
-        return id;
+    static Order mapFrom(CreateOrderCmd cmd) {
+        var order = new Order();
+        order.id = UUID.randomUUID();
+        order.cid = cmd.customerId();
+        order.ctime = LocalDateTime.now();
+        order.status = ORDER_STATUS_WAITING;
+        order.items = new ArrayList<>(cmd
+                .products()
+                .stream()
+                .map(Order::toOrderItem)
+                .toList());
+        return order;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    private static OrderItem toOrderItem(ProductDto pr) {
+        var item = new OrderItem();
+        item.setId(UUID.randomUUID());
+        item.setName(pr.getName());
+        item.setPrice(pr.getPrice());
+        item.setQuantity(pr.getQuantity());
+        item.setWeight(pr.getWeight());
+        return item;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public UUID getCid() {
         return cid;
     }
 
-    public void setCid(UUID cid) {
-        this.cid = cid;
-    }
-
     public LocalDateTime getCtime() {
         return ctime;
-    }
-
-    public void setCtime(LocalDateTime ctime) {
-        this.ctime = ctime;
     }
 
     public float getDiscount() {
         return discount;
     }
 
-    public void setDiscount(float discount) {
+    public void applyDiscount(float discount) {
         this.discount = discount;
     }
 
@@ -71,16 +86,8 @@ class Order {
         return items;
     }
 
-    public void setItems(List<OrderItem> items) {
-        this.items = items;
-    }
-
     public int getStatus() {
         return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
     }
 
     public BigDecimal getDeliveryCost() {
@@ -89,6 +96,25 @@ class Order {
 
     public void setDeliveryCost(BigDecimal deliveryCost) {
         this.deliveryCost = deliveryCost;
+    }
+
+    void computeDelivery() {
+        var totalPrice = BigDecimal.ZERO;
+        var totalWeight = 0;
+        for (OrderItem item : getItems()) {
+            totalPrice = totalPrice.add(item.getPrice()
+                    .multiply(new BigDecimal(item.getQuantity()))); // totalPrice = totalPrice + (item.price * item.quantity)
+            totalWeight += (item.getQuantity() * item.getWeight());
+        }
+        if (totalPrice.compareTo(FREE_DELIVERY) > 0 && totalWeight < 1) {
+            setDeliveryCost(BigDecimal.ZERO);
+        } else if (totalWeight < 1) {
+            setDeliveryCost(new BigDecimal(15));
+        } else if (totalWeight < 5) {
+            setDeliveryCost(new BigDecimal(35));
+        } else {
+            setDeliveryCost(new BigDecimal(50));
+        }
     }
 
     @Override
